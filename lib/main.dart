@@ -10,7 +10,10 @@ Future<void> main() async {
 
   Env.assertConfigured();
 
-  await Supabase.initialize(url: Env.supabaseUrl, anonKey: Env.supabaseAnonKey);
+  await Supabase.initialize(
+    url: Env.supabaseUrl,
+    publishableKey: Env.supabaseAnonKey,
+  );
 
   runApp(const ProviderScope(child: KiwiInventoryApp()));
 }

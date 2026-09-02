@@ -1,0 +1,94 @@
+name: CI
+
+# constitution Principle II（テスト戦略）に基づき、1ジョブ内で
+# analyze → unit/widgetテスト → ローカルSupabaseスタック起動 → integrationテスト
+# の順に実行する。Flutter Web単一コードベース（ネイティブ配布なし）のため、
+# プラットフォームのマトリクス化は行わない。
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Static analysis
+        run: flutter analyze
+
+      - name: Format check
+        run: dart format --output=none --set-exit-if-changed lib test
+
+      # --- unit / widget（golden）テスト ---
+      # test/ 配下のみが対象。integration_test/ はここには含まれない。
+      - name: Unit & widget (golden) tests
+        run: flutter test
+
+      # --- integration テスト ---
+      - uses: supabase/setup-cli@v1
+        with:
+          version: latest
+
+      - name: Start local Supabase stack
+        run: supabase start
+
+      - name: Export local Supabase connection info
+        run: supabase status -o env >> "$GITHUB_ENV"
+
+      - name: Create integration test users
+        env:
+          FIELD_STAFF_EMAIL: integration-test-field-staff@example.com
+          FIELD_STAFF_PASSWORD: integration-test-password-1
+          ADMIN_EMAIL: integration-test-admin@example.com
+          ADMIN_PASSWORD: integration-test-password-2
+        run: |
+          set -euo pipefail
+
+          create_user() {
+            local email="$1" password="$2"
+            curl -sf -X POST "${API_URL}/auth/v1/admin/users" \
+              -H "apikey: ${SERVICE_ROLE_KEY}" \
+              -H "Authorization: Bearer ${SERVICE_ROLE_KEY}" \
+              -H "Content-Type: application/json" \
+              -d "{\"email\":\"${email}\",\"password\":\"${password}\",\"email_confirm\":true}"
+          }
+
+          create_user "$FIELD_STAFF_EMAIL" "$FIELD_STAFF_PASSWORD"
+          create_user "$ADMIN_EMAIL" "$ADMIN_PASSWORD"
+
+          # 新規ユーザーはトリガーによりデフォルトで field_staff になる（0001_init_mvp.sql参照）。
+          # 管理者用アカウントだけ admin に昇格させる。
+          psql "$DB_URL" -c \
+            "update public.profiles set role = 'admin' where id = (select id from auth.users where email = '${ADMIN_EMAIL}');"
+
+          {
+            echo "INTEGRATION_TEST_FIELD_STAFF_EMAIL=${FIELD_STAFF_EMAIL}"
+            echo "INTEGRATION_TEST_FIELD_STAFF_PASSWORD=${FIELD_STAFF_PASSWORD}"
+            echo "INTEGRATION_TEST_ADMIN_EMAIL=${ADMIN_EMAIL}"
+            echo "INTEGRATION_TEST_ADMIN_PASSWORD=${ADMIN_PASSWORD}"
+          } >> "$GITHUB_ENV"
+
+      - name: Integration tests (against local Supabase + RLS)
+        run: |
+          flutter test integration_test \
+            --dart-define=SUPABASE_URL="$API_URL" \
+            --dart-define=SUPABASE_ANON_KEY="$ANON_KEY" \
+            --dart-define=INTEGRATION_TEST_FIELD_STAFF_EMAIL="$INTEGRATION_TEST_FIELD_STAFF_EMAIL" \
+            --dart-define=INTEGRATION_TEST_FIELD_STAFF_PASSWORD="$INTEGRATION_TEST_FIELD_STAFF_PASSWORD" \
+            --dart-define=INTEGRATION_TEST_ADMIN_EMAIL="$INTEGRATION_TEST_ADMIN_EMAIL" \
+            --dart-define=INTEGRATION_TEST_ADMIN_PASSWORD="$INTEGRATION_TEST_ADMIN_PASSWORD"
+
+      - name: Stop local Supabase stack
+        if: always()
+        run: supabase stop

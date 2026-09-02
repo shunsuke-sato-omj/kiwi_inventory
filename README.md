@@ -41,6 +41,8 @@ flutter run -d chrome \
   --dart-define=SUPABASE_ANON_KEY=<anon public key>
 ```
 
+WSL環境など `-d chrome` が使えない場合は、`flutter run -d web-server --web-port=8080 --dart-define=...` で起動し、`http://localhost:8080` をブラウザで開いてください。
+
 ### 5. Web向けビルド
 
 ```bash
@@ -58,6 +60,28 @@ flutter analyze
 flutter test
 dart format --output=none --set-exit-if-changed lib test
 ```
+
+## テスト戦略（constitution Principle II）
+
+自動テストは3層のピラミッドで構成する。
+
+1. **unit**（`test/*.dart`、`integration_test/`は含まない）: 純粋関数（例: `shipment_validation_test.dart`, `dashboard_metrics_test.dart`）と、`mocktail`でRepositoryをモック化したProvider/Controllerのテスト（例: `harvest_form_controller_test.dart`）。SupabaseClientを直接テストコードに埋め込むことはしない。
+2. **widget**（golden）: `golden_toolkit` によるスクリーンショット差分テスト（例: `login_screen_golden_test.dart`）。基準画像（`test/goldens/*.png`）はCI環境で生成・更新したものを正とする。ローカルで意図的に見た目を変更した場合は `flutter test --update-goldens` で更新する。
+3. **integration**（`integration_test/`）: `supabase start` で立てたローカルSupabaseスタック＋シードデータに対して実行し、RLSポリシーの検証も含む。ローカルで実行する場合:
+   ```bash
+   supabase start
+   # supabase status の値と、事前に作成したテストユーザー（2名: 現場スタッフ・管理者）を使って:
+   flutter test integration_test \
+     --dart-define=SUPABASE_URL=<supabase status の API URL> \
+     --dart-define=SUPABASE_ANON_KEY=<supabase status の anon key> \
+     --dart-define=INTEGRATION_TEST_FIELD_STAFF_EMAIL=<現場スタッフのメール> \
+     --dart-define=INTEGRATION_TEST_FIELD_STAFF_PASSWORD=<パスワード> \
+     --dart-define=INTEGRATION_TEST_ADMIN_EMAIL=<管理者のメール> \
+     --dart-define=INTEGRATION_TEST_ADMIN_PASSWORD=<パスワード>
+   ```
+   接続情報が未設定の場合、このテストは（誤って実行されても失敗しないよう）自動的にスキップされる。
+
+CI（`.github/workflows/ci.yml`）は1ジョブ内で `flutter analyze` → unit/widgetテスト → `supabase start` → integrationテストの順に実行する（テストユーザーの作成も含む）。ローカル開発中は、`.claude/settings.json` のPostToolUseフックが `lib/` `test/`（`integration_test/`を除く）の `.dart` ファイル編集後に自動で `flutter test` を実行し、素早くフィードバックを返す。
 
 ## フォルダ構成
 
@@ -85,6 +109,11 @@ lib/
 supabase/
   migrations/                # MVPスキーマ（番号順に適用）
   seed.sql                   # 開発用サンプルデータ
+integration_test/            # Supabaseローカルスタックに対するintegrationテスト
+test/
+  goldens/                   # golden_toolkitの基準画像
+  flutter_test_config.dart   # golden_toolkit共通設定（フォント読み込み）
+.github/workflows/ci.yml     # analyze → unit/widget → integration の1ジョブCI
 specs/001-inventory-mvp/     # spec-kit の仕様・計画・タスク一式
 ```
 
