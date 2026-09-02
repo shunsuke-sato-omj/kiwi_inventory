@@ -41,8 +41,16 @@ List<Lot> lotsNearingRipeness(
   }).toList();
 }
 
-/// 品種ごとの在庫合計（期限切れロットは除く）が [threshold] を下回る品種を
-/// 返す（FR-014）。
+/// 品種ごとの重量（kg）合計（期限切れロットは除く）が [threshold] を
+/// 下回る品種を返す（FR-014）。
+///
+/// 重要な既知の制限: `threshold` はkg単位のしきい値だが、ロットは重量(kg)と
+/// 個数のどちらか一方で記録される（FR-016）。個数のみで記録されたロットは
+/// このkg基準の判定には含めない（重量と個数を単純合算すると単位が異なる値を
+/// 混ぜることになり、誤った低在庫アラートを出しかねないため）。
+/// 「個数だけで記録された在庫をどう低在庫判定に含めるか」は要件定義書側で
+/// 決まっていない事項であり、ReFruitsとの確認が必要（Principle IV: 推測しない）。
+/// 確認が取れるまでは、個数のみのロットは本判定の対象外という扱いになる。
 List<Variety> lowStockVarieties(
   List<Lot> lots,
   List<Variety> varieties, {
@@ -52,7 +60,8 @@ List<Variety> lowStockVarieties(
   for (final lot in lots) {
     final varietyId = lot.varietyId;
     if (varietyId == null || lot.status == LotStatus.expired) continue;
-    totals[varietyId] = (totals[varietyId] ?? 0) + lot.primaryQuantity;
+    if (lot.weightKg == null) continue; // 個数のみのロットはkg基準の対象外
+    totals[varietyId] = (totals[varietyId] ?? 0) + lot.weightKg!;
   }
   return varieties.where((v) => (totals[v.id] ?? 0) < threshold).toList();
 }

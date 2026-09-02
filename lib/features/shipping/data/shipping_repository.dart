@@ -22,6 +22,11 @@ class ShippingRepository {
   }
 
   /// 対象ロットの残り在庫数量（ロットの重量 − 既存出荷分の合計）。
+  ///
+  /// これは保存前にユーザーへ「残りどれだけか」を見せるための参考値であり、
+  /// 実際の超過防止（FR-017）はDB側の`create_shipment`RPC（行ロックで同時実行を
+  /// 直列化）が保証する。このメソッド単体は複数回のAPI呼び出しに分かれており
+  /// アトミック性が無いため、超過防止の一次防御としては使わないこと。
   Future<num> fetchRemainingQuantity(String lotId) async {
     final lotRow = await _client
         .from('lots')
@@ -46,8 +51,13 @@ class ShippingRepository {
     return remaining < 0 ? 0 : remaining;
   }
 
-  /// 出荷記録を保存する。保存前に残り在庫を超えていないかを検証し、
-  /// 超えている場合は [ShipmentQuantityExceededException] を投げて保存しない（FR-017）。
+  /// 出荷記録を保存する。
+  ///
+  /// クライアント側でも[validateShipmentQuantity]による事前チェックを行うが
+  /// （素早いフィードバックのため）、実際の超過防止（FR-017）は
+  /// DB側の`create_shipment`RPC（行ロックによる同時実行の直列化）が保証する。
+  /// 超過時はRPCが例外を投げ、[ShipmentQuantityExceededException]として
+  /// 呼び出し側に伝える。
   Future<void> createShipment({
     required String lotId,
     required ShipmentChannel channel,
@@ -65,18 +75,28 @@ class ShippingRepository {
       throw ShipmentQuantityExceededException(validationError);
     }
 
-    final String? userId = _client.auth.currentUser?.id;
-    await _client.from('shipments').insert({
-      'lot_id': lotId,
-      'channel': channel.dbValue,
-      'quantity_kg': quantityKg,
-      'delivery_method': channel.requiresDeliveryMethod
-          ? deliveryMethod.dbValue
-          : DeliveryMethod.none.dbValue,
-      'shipped_at': _formatDate(shippedAt),
-      'customer_name': customerName,
-      'recorded_by': userId,
-    });
+    try {
+      await _client.rpc(
+        'create_shipment',
+        params: {
+          'p_lot_id': lotId,
+          'p_channel': channel.dbValue,
+          'p_quantity_kg': quantityKg,
+          'p_delivery_method': channel.requiresDeliveryMethod
+              ? deliveryMethod.dbValue
+              : DeliveryMethod.none.dbValue,
+          'p_shipped_at': _formatDate(shippedAt),
+          'p_customer_name': customerName,
+        },
+      );
+    } on PostgrestException catch (e) {
+      // create_shipment RPC が raise exception したメッセージ
+      // （超過チェック・ロット未検出など）はそのままユーザーに見せてよい内容。
+      if (e.code == 'P0001') {
+        throw ShipmentQuantityExceededException(e.message);
+      }
+      rethrow;
+    }
   }
 
   String _formatDate(DateTime date) =>

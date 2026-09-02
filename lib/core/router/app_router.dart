@@ -28,9 +28,12 @@ final Provider<GoRouter> appRouterProvider = Provider<GoRouter>((ref) {
 
       // FR-003: マスタ管理は管理者のみ。現場スタッフが直接URLでアクセスした
       // 場合もホームへ戻す（ナビ項目の非表示はhome_shell.dart側で対応済み）。
+      // 役割の取得がまだ完了していない間は「管理者ではない」扱いにする
+      // （fail-closed。home_shell.dartのナビ非表示と同じ既定値に揃える）。
       if (loggedIn && state.matchedLocation == '/master-data') {
         final UserRole? role = ref.read(currentUserRoleProvider).valueOrNull;
-        if (role != null && !canManageMasterData(role)) return '/';
+        final bool isAdmin = role != null && canManageMasterData(role);
+        if (!isAdmin) return '/';
       }
       return null;
     },

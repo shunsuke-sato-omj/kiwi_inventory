@@ -15,8 +15,26 @@ String mapSupabaseErrorToMessage(Object error) {
     return 'ログイン状態が確認できませんでした。再度ログインしてください。';
   }
   if (error is PostgrestException) {
-    // 開発時に原因が追えるよう message は残しつつ、現場向けには簡潔な文言にする。
-    return '保存に失敗しました。入力内容をご確認のうえ、もう一度お試しください。';
+    return _mapPostgrestError(error);
   }
   return '通信状態が悪く保存できませんでした。電波の良い場所で再度お試しください。';
+}
+
+/// PostgreSQLのSQLSTATEコード（.code）ごとに原因の異なる文言を返す。
+/// コード一覧: https://www.postgresql.org/docs/current/errcodes-appendix.html
+String _mapPostgrestError(PostgrestException error) {
+  switch (error.code) {
+    case 'P0001':
+      // アプリのRPC関数が`raise exception`で明示的に投げた、ユーザーに
+      // そのまま見せてよいメッセージ（在庫超過チェック等）。
+      return error.message;
+    case '23505':
+      return '同じ内容がすでに登録されています。入力内容をご確認ください。';
+    case '23503':
+      return '関連するデータが見つかりませんでした。マスタの登録状況をご確認ください。';
+    case '42501':
+      return 'この操作を行う権限がありません。管理者にご確認ください。';
+    default:
+      return '保存に失敗しました。入力内容をご確認のうえ、もう一度お試しください。';
+  }
 }

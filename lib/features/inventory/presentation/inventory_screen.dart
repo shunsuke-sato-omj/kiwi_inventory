@@ -97,6 +97,9 @@ class _LotTile extends ConsumerWidget {
                   .read(inventoryRepositoryProvider)
                   .updateStatus(lotId: lot.id, newStatus: action.status!);
               ref.invalidate(filteredLotsProvider);
+              // 変更履歴シートを開き直したときに古い履歴が出ないよう、
+              // このロットの履歴キャッシュも破棄する（FR-009）。
+              ref.invalidate(lotStatusHistoryProvider(lot.id));
             } catch (e) {
               if (context.mounted) {
                 ScaffoldMessenger.of(context).showSnackBar(

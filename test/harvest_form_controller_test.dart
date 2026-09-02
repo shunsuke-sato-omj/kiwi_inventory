@@ -5,7 +5,7 @@ import 'package:kiwi_inventory/features/harvest/data/harvest_repository.dart';
 import 'package:mocktail/mocktail.dart';
 
 /// Repositoryをmocktailでモック化する例（constitution Principle II: unitテスト）。
-/// SupabaseClientは一切登場させず、`HarvestRepository`という抽象だけを差し替える。
+/// SupabaseClientは一切登場せず、`HarvestRepository`という抽象だけを差し替える。
 class MockHarvestRepository extends Mock implements HarvestRepository {}
 
 void main() {
@@ -22,7 +22,6 @@ void main() {
     container = ProviderContainer(
       overrides: [harvestRepositoryProvider.overrideWithValue(mockRepository)],
     );
-    when(() => mockRepository.generateLotCode()).thenReturn('L-2609-0001');
   });
 
   tearDown(() => container.dispose());
@@ -31,7 +30,6 @@ void main() {
     test('保存に成功するとtrueを返し、状態はエラーなしになる', () async {
       when(
         () => mockRepository.recordHarvest(
-          lotCode: any(named: 'lotCode'),
           varietyId: any(named: 'varietyId'),
           fieldId: any(named: 'fieldId'),
           harvestedAt: any(named: 'harvestedAt'),
@@ -55,7 +53,6 @@ void main() {
       expect(container.read(harvestFormControllerProvider).hasError, isFalse);
       verify(
         () => mockRepository.recordHarvest(
-          lotCode: 'L-2609-0001',
           varietyId: 'v1',
           fieldId: 'f1',
           harvestedAt: DateTime(2026, 9, 2),
@@ -71,7 +68,6 @@ void main() {
     test('保存に失敗するとfalseを返し、状態はエラーになる', () async {
       when(
         () => mockRepository.recordHarvest(
-          lotCode: any(named: 'lotCode'),
           varietyId: any(named: 'varietyId'),
           fieldId: any(named: 'fieldId'),
           harvestedAt: any(named: 'harvestedAt'),

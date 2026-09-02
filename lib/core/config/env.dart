@@ -21,12 +21,10 @@ class Env {
     defaultValue: '',
   );
 
-  /// 開発中に環境変数の設定漏れへ早めに気づけるようにするための検証。
-  static void assertConfigured() {
-    assert(
-      supabaseUrl.isNotEmpty && supabaseAnonKey.isNotEmpty,
-      'SUPABASE_URL / SUPABASE_ANON_KEY が設定されていません。'
-      '--dart-define で指定してください（README参照）。',
-    );
-  }
+  /// --dart-defineで必要な値が渡されているか。
+  ///
+  /// `assert()`はrelease/profileビルドで丸ごと消えるため、設定漏れの検知には
+  /// 使わず、main.dartでこのgetterを実行時にチェックしてエラー画面を出す。
+  static bool get isConfigured =>
+      supabaseUrl.isNotEmpty && supabaseAnonKey.isNotEmpty;
 }

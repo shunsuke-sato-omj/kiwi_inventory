@@ -46,6 +46,9 @@ class _ShippingScreenState extends ConsumerState<ShippingScreen> {
       ScaffoldMessenger.of(context)
           .showSnackBar(const SnackBar(content: Text('出荷を記録しました')));
       ref.invalidate(shippableLotsProvider);
+      // 出荷後は「残り在庫」の表示も古いままになるため、このロット分の
+      // キャッシュを破棄し、次に選択したときに最新値を取り直す。
+      ref.invalidate(remainingQuantityProvider(lot.id));
       setState(() {
         _selectedLot = null;
         _quantityKg = 1;

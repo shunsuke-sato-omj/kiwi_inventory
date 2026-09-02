@@ -29,7 +29,6 @@ class HarvestFormController extends StateNotifier<AsyncValue<void>> {
   }) => _submit(() {
     final repository = _ref.read(harvestRepositoryProvider);
     return repository.recordHarvest(
-      lotCode: repository.generateLotCode(),
       varietyId: varietyId,
       fieldId: fieldId,
       harvestedAt: harvestedAt,
@@ -52,7 +51,6 @@ class HarvestFormController extends StateNotifier<AsyncValue<void>> {
   }) => _submit(() {
     final repository = _ref.read(harvestRepositoryProvider);
     return repository.recordPurchase(
-      lotCode: repository.generateLotCode(),
       supplierId: supplierId,
       purchasedAt: purchasedAt,
       weightKg: weightKg,

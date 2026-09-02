@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../../core/models/lot.dart';
@@ -10,9 +12,14 @@ class HarvestRepository {
   HarvestRepository(this._client);
 
   final SupabaseClient _client;
+  final Random _random = Random();
+
+  static const int _maxLotCodeRetries = 5;
+
+  /// Postgresの一意制約違反（unique_violation）のSQLSTATEコード。
+  static const String _uniqueViolationCode = '23505';
 
   Future<void> recordHarvest({
-    required String lotCode,
     required String varietyId,
     required String fieldId,
     required DateTime harvestedAt,
@@ -23,8 +30,7 @@ class HarvestRepository {
     String? storageLocationId,
   }) async {
     final String? userId = _client.auth.currentUser?.id;
-    await _client.from('lots').insert({
-      'lot_code': lotCode,
+    await _insertLotWithRetry({
       'origin': LotOrigin.ownFarm.dbValue,
       'variety_id': varietyId,
       'field_id': fieldId,
@@ -39,7 +45,6 @@ class HarvestRepository {
   }
 
   Future<void> recordPurchase({
-    required String lotCode,
     required String supplierId,
     required DateTime purchasedAt,
     double? weightKg,
@@ -49,8 +54,7 @@ class HarvestRepository {
     String? storageLocationId,
   }) async {
     final String? userId = _client.auth.currentUser?.id;
-    await _client.from('lots').insert({
-      'lot_code': lotCode,
+    await _insertLotWithRetry({
       'origin': LotOrigin.purchased.dbValue,
       'supplier_id': supplierId,
       'harvested_or_purchased_at': _formatDate(purchasedAt),
@@ -63,14 +67,33 @@ class HarvestRepository {
     });
   }
 
-  /// 「L-2609-01」のような、日付＋連番のロットコードを発行する。
-  /// MVP規模（7名・小規模在庫）では厳密な連番管理は不要なため、
-  /// タイムスタンプを使った衝突しにくい採番にとどめる（Principle V）。
-  String generateLotCode() {
+  /// [values]に`lot_code`を付けてINSERTする。ロットコードの一意制約違反
+  /// （まれな採番衝突）が起きた場合は、新しいコードを振り直して再試行する。
+  Future<void> _insertLotWithRetry(Map<String, dynamic> values) async {
+    for (var attempt = 0; attempt < _maxLotCodeRetries; attempt++) {
+      try {
+        await _client.from('lots').insert({
+          ...values,
+          'lot_code': _generateLotCode(),
+        });
+        return;
+      } on PostgrestException catch (e) {
+        final bool isLastAttempt = attempt == _maxLotCodeRetries - 1;
+        if (e.code != _uniqueViolationCode || isLastAttempt) rethrow;
+        // 一意制約違反（ロットコードの偶発的な衝突）のみ、コードを振り直して再試行する。
+      }
+    }
+  }
+
+  /// 「L-2609-123456」のような、日付＋ランダム値のロットコードを発行する。
+  /// タイムスタンプの下数桁だけに頼ると短時間の連続入力で衝突しうるため、
+  /// 十分な範囲の乱数を使い、それでも衝突した場合は[_insertLotWithRetry]が
+  /// 振り直して再試行する（Principle V: 過剰な連番管理基盤は持たない）。
+  String _generateLotCode() {
     final now = DateTime.now();
     final yy = (now.year % 100).toString().padLeft(2, '0');
     final mm = now.month.toString().padLeft(2, '0');
-    final suffix = now.millisecondsSinceEpoch.remainder(100000).toString();
+    final suffix = (_random.nextInt(900000) + 100000).toString();
     return 'L-$yy$mm-$suffix';
   }
 

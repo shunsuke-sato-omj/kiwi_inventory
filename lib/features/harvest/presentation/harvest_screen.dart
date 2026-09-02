@@ -9,6 +9,11 @@ import '../application/harvest_providers.dart';
 
 enum _RecordMode { harvest, purchase }
 
+/// 数量の記録単位。重量と個数はどちらか一方だけを記録する（両方同時に
+/// 記録すると、レビューで見つかった「重量0kgが個数を覆い隠す」バグの
+/// 温床になるため、明示的にどちらかを選ばせる）。
+enum _QuantityMode { weight, count }
+
 /// 収穫（自社栽培）・仕入れ（select提携先）の記録画面（FR-004, FR-005, FR-006）。
 ///
 /// Principle II（現場での使いやすさ最優先）に沿い、片手操作・チップ選択・
@@ -28,8 +33,9 @@ class _HarvestScreenState extends ConsumerState<HarvestScreen> {
   String? _selectedStorageLocationId;
   SizeGrade? _selectedSizeGrade;
   DateTime _date = DateTime.now();
+  _QuantityMode _quantityMode = _QuantityMode.weight;
   double _weightKg = 5;
-  int _quantityCount = 0;
+  int _quantityCount = 1;
   int _containerCount = 1;
 
   void _resetForm() {
@@ -40,11 +46,20 @@ class _HarvestScreenState extends ConsumerState<HarvestScreen> {
       _selectedStorageLocationId = null;
       _selectedSizeGrade = null;
       _date = DateTime.now();
+      _quantityMode = _QuantityMode.weight;
       _weightKg = 5;
-      _quantityCount = 0;
+      _quantityCount = 1;
       _containerCount = 1;
     });
   }
+
+  /// 記録単位（重量／個数）に応じて、選ばれなかった方は必ずnullで送る。
+  /// 両方に値が入っていると、下流の在庫計算が重量を個数より優先してしまい、
+  /// 個数記録のロットが在庫0扱いになるバグの原因になる。
+  double? get _weightKgToSend =>
+      _quantityMode == _QuantityMode.weight ? _weightKg : null;
+  int? get _quantityCountToSend =>
+      _quantityMode == _QuantityMode.count ? _quantityCount : null;
 
   Future<void> _submit() async {
     final controller = ref.read(harvestFormControllerProvider.notifier);
@@ -58,8 +73,8 @@ class _HarvestScreenState extends ConsumerState<HarvestScreen> {
         varietyId: _selectedVarietyId!,
         fieldId: _selectedFieldId!,
         harvestedAt: _date,
-        weightKg: _weightKg,
-        quantityCount: _quantityCount == 0 ? null : _quantityCount,
+        weightKg: _weightKgToSend,
+        quantityCount: _quantityCountToSend,
         sizeGrade: _selectedSizeGrade,
         containerCount: _containerCount,
         storageLocationId: _selectedStorageLocationId,
@@ -72,8 +87,8 @@ class _HarvestScreenState extends ConsumerState<HarvestScreen> {
       ok = await controller.submitPurchase(
         supplierId: _selectedSupplierId!,
         purchasedAt: _date,
-        weightKg: _weightKg,
-        quantityCount: _quantityCount == 0 ? null : _quantityCount,
+        weightKg: _weightKgToSend,
+        quantityCount: _quantityCountToSend,
         sizeGrade: _selectedSizeGrade,
         containerCount: _containerCount,
         storageLocationId: _selectedStorageLocationId,
@@ -194,21 +209,33 @@ class _HarvestScreenState extends ConsumerState<HarvestScreen> {
             },
           ),
           const SizedBox(height: 16),
-          _StepperField(
-            label: '重量 (kg)',
-            value: _weightKg,
-            step: 0.5,
-            min: 0,
-            onChanged: (v) => setState(() => _weightKg = v),
+          _SectionLabel('数量の記録方法'),
+          SegmentedButton<_QuantityMode>(
+            segments: const [
+              ButtonSegment(value: _QuantityMode.weight, label: Text('重量で記録')),
+              ButtonSegment(value: _QuantityMode.count, label: Text('個数で記録')),
+            ],
+            selected: {_quantityMode},
+            onSelectionChanged: (selection) =>
+                setState(() => _quantityMode = selection.first),
           ),
           const SizedBox(height: 12),
-          _StepperField(
-            label: '個数',
-            value: _quantityCount.toDouble(),
-            step: 1,
-            min: 0,
-            onChanged: (v) => setState(() => _quantityCount = v.round()),
-          ),
+          if (_quantityMode == _QuantityMode.weight)
+            _StepperField(
+              label: '重量 (kg)',
+              value: _weightKg,
+              step: 0.5,
+              min: 0,
+              onChanged: (v) => setState(() => _weightKg = v),
+            )
+          else
+            _StepperField(
+              label: '個数',
+              value: _quantityCount.toDouble(),
+              step: 1,
+              min: 1,
+              onChanged: (v) => setState(() => _quantityCount = v.round()),
+            ),
           const SizedBox(height: 12),
           _StepperField(
             label: 'コンテナ数',

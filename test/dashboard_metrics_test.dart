@@ -9,6 +9,7 @@ Lot _lot({
   LotStatus status = LotStatus.cold,
   String? varietyId,
   double? weightKg,
+  int? quantityCount,
   DateTime? ripeningStartedAt,
 }) {
   return Lot(
@@ -19,6 +20,7 @@ Lot _lot({
     harvestedOrPurchasedAt: DateTime(2026, 8, 1),
     varietyId: varietyId,
     weightKg: weightKg,
+    quantityCount: quantityCount,
     ripeningStartedAt: ripeningStartedAt,
   );
 }
@@ -94,6 +96,15 @@ void main() {
       final lots = [
         _lot(id: '1', varietyId: 'v1', weightKg: 20, status: LotStatus.expired),
       ];
+      final result = lowStockVarieties(lots, [variety], threshold: 10);
+      expect(result, contains(variety));
+    });
+
+    test('個数のみで記録されたロットはkg基準の合計に含めない（単位混在防止）', () {
+      // 重量(kg)と個数は単位が異なるため単純合算しない。
+      // 個数のみのロット（quantityCount=500）は無視され、
+      // 重量記録が無い（＝合計0kg）ためしきい値未満と判定される。
+      final lots = [_lot(id: '1', varietyId: 'v1', quantityCount: 500)];
       final result = lowStockVarieties(lots, [variety], threshold: 10);
       expect(result, contains(variety));
     });
