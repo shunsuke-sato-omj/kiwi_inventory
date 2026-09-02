@@ -21,8 +21,8 @@ description: "Task list template for feature implementation"
 
 ## Phase 1: Setup
 
-- [ ] T001 `supabase/migrations/0002_supplier_contract_date.sql` を作成し、`public.suppliers` に `contract_started_at date` を追加する（data-model.md参照）
-- [ ] T002 [P] `supabase/seed.sql` のサンプル仕入先データに `contract_started_at` の値を追加する
+- [X] T001 `supabase/migrations/0002_supplier_contract_date.sql` を作成し、`public.suppliers` に `contract_started_at date` を追加する（data-model.md参照）
+- [X] T002 [P] `supabase/seed.sql` のサンプル仕入先データに `contract_started_at` の値を追加する
 
 ---
 
@@ -30,13 +30,13 @@ description: "Task list template for feature implementation"
 
 **⚠️ 全ユーザーストーリーはこのフェーズの完了後に着手する**
 
-- [ ] T003 [P] `lib/core/models/master_data.dart` に `Variety` / `FarmField` / `Supplier` / `StorageLocation` エンティティ（`fromRow(Map<String, dynamic>)`ファクトリ付き）を作成する
-- [ ] T004 [P] `lib/core/models/lot.dart` に `Lot` エンティティ・`LotOrigin` enum・`SizeGrade` enum（S/M/L/2L、`fromDb`/`label`、FR-016）を作成する
-- [ ] T005 [P] `lib/core/models/shipment.dart` に `Shipment` エンティティ・`ShipmentChannel` enum（ec/wholesale/program）・`DeliveryMethod` enum（sagawa/direct/none）を作成する
-- [ ] T006 [P] `lib/core/access/role_access.dart` に `bool canManageMasterData(UserRole role)` などの純粋関数を作成する（FR-003の権限判定を1箇所に集約）
-- [ ] T007 [P] `lib/core/data/supabase_error_mapper.dart` に、Supabaseの例外（`PostgrestException`, `AuthException`, ネットワーク例外）を日本語の分かりやすいエラーメッセージ文字列に変換する関数を作成する（FR-018: オフライン等の保存失敗時のエラー表示に使う）
-- [ ] T008 `lib/core/router/home_shell.dart` を `ConsumerWidget` 化し、`currentUserRoleProvider` を見て `canManageMasterData` が false の場合は「マスタ管理」ナビ項目を非表示にする
-- [ ] T009 `lib/core/router/app_router.dart` の `redirect` に、`field_staff` が `/master-data` に直接アクセスした場合は `/` へリダイレクトする分岐を追加する（FR-003）
+- [X] T003 [P] `lib/core/models/master_data.dart` に `Variety` / `FarmField` / `Supplier` / `StorageLocation` エンティティ（`fromRow(Map<String, dynamic>)`ファクトリ付き）を作成する
+- [X] T004 [P] `lib/core/models/lot.dart` に `Lot` エンティティ・`LotOrigin` enum・`SizeGrade` enum（S/M/L/2L、`fromDb`/`label`、FR-016）を作成する
+- [X] T005 [P] `lib/core/models/shipment.dart` に `Shipment` エンティティ・`ShipmentChannel` enum（ec/wholesale/program）・`DeliveryMethod` enum（sagawa/direct/none）を作成する
+- [X] T006 [P] `lib/core/access/role_access.dart` に `bool canManageMasterData(UserRole role)` などの純粋関数を作成する（FR-003の権限判定を1箇所に集約）
+- [X] T007 [P] `lib/core/data/supabase_error_mapper.dart` に、Supabaseの例外（`PostgrestException`, `AuthException`, ネットワーク例外）を日本語の分かりやすいエラーメッセージ文字列に変換する関数を作成する（FR-018: オフライン等の保存失敗時のエラー表示に使う）
+- [X] T008 `lib/core/router/home_shell.dart` を `ConsumerWidget` 化し、`currentUserRoleProvider` を見て `canManageMasterData` が false の場合は「マスタ管理」ナビ項目を非表示にする
+- [X] T009 `lib/core/router/app_router.dart` の `redirect` に、`field_staff` が `/master-data` に直接アクセスした場合は `/` へリダイレクトする分岐を追加する（FR-003）
 
 ---
 
@@ -46,11 +46,11 @@ description: "Task list template for feature implementation"
 
 **Independent Test**: 管理者でログインし品種を1件登録・保存できること、現場スタッフでログインした際にマスタ管理タブが表示されないことを確認する。
 
-- [ ] T010 [P] [US1] `test/role_access_test.dart` に `canManageMasterData` のユニットテストを作成する（admin→true, field_staff→false）
-- [ ] T011 [US1] `lib/features/master_data/data/master_data_repository.dart` に、`varieties`/`fields`/`suppliers`/`storage_locations` 各テーブルの一覧取得・新規作成メソッドを持つ `MasterDataRepository` を実装する（Supabaseアクセスはこのクラスに閉じ込める、Principle IV）
-- [ ] T012 [US1] `lib/features/master_data/application/master_data_providers.dart` に、リポジトリのProviderと4種の一覧を取得する `FutureProvider` 群を実装する
-- [ ] T013 [US1] `lib/features/master_data/presentation/master_data_screen.dart` を、4タブ（品種／圃場／仕入先／保管場所）のリスト表示＋追加ダイアログを持つ画面に実装する（`PlaceholderScreen`を置き換え）。仕入先タブは仕入先名・連絡先・住所・取引開始日を入力できるようにする（FR-001）
-- [ ] T014 [US1] `lib/features/harvest` 等、他featureの品種/圃場/仕入先/保管場所の選択UIから `master_data_providers.dart` の一覧を再利用できるようにエクスポートを整理する
+- [X] T010 [P] [US1] `test/role_access_test.dart` に `canManageMasterData` のユニットテストを作成する（admin→true, field_staff→false）
+- [X] T011 [US1] `lib/features/master_data/data/master_data_repository.dart` に、`varieties`/`fields`/`suppliers`/`storage_locations` 各テーブルの一覧取得・新規作成メソッドを持つ `MasterDataRepository` を実装する（Supabaseアクセスはこのクラスに閉じ込める、Principle IV）
+- [X] T012 [US1] `lib/features/master_data/application/master_data_providers.dart` に、リポジトリのProviderと4種の一覧を取得する `FutureProvider` 群を実装する
+- [X] T013 [US1] `lib/features/master_data/presentation/master_data_screen.dart` を、4タブ（品種／圃場／仕入先／保管場所）のリスト表示＋追加ダイアログを持つ画面に実装する（`PlaceholderScreen`を置き換え）。仕入先タブは仕入先名・連絡先・住所・取引開始日を入力できるようにする（FR-001）
+- [X] T014 [US1] `lib/features/harvest` 等、他featureの品種/圃場/仕入先/保管場所の選択UIから `master_data_providers.dart` の一覧を再利用できるようにエクスポートを整理する
 
 **Checkpoint**: US1は独立して動作確認可能（管理者のマスタ登録、役割別の画面出し分け）
 
@@ -62,11 +62,11 @@ description: "Task list template for feature implementation"
 
 **Independent Test**: 収穫内容を1件入力・保存し、在庫一覧にそのロットが「冷蔵保管」として現れることを確認する。
 
-- [ ] T015 [P] [US2] `test/size_grade_test.dart` に `SizeGrade` の日本語ラベル・DB値変換のユニットテストを作成する
-- [ ] T016 [US2] `lib/features/harvest/data/harvest_repository.dart` に、収穫記録（`origin=own_farm`）と仕入れ記録（`origin=purchased`）それぞれを `lots` テーブルへINSERTするメソッドを実装する（FR-004, FR-005, FR-006）
-- [ ] T017 [US2] `lib/features/harvest/application/harvest_providers.dart` にリポジトリProviderとフォーム送信状態（送信中/エラー）の`StateNotifier`または`AsyncNotifier`を実装する
-- [ ] T018 [US2] `lib/features/harvest/presentation/harvest_screen.dart` を、「収穫」「仕入れ」を切り替えるセグメントと、圃場/品種/サイズ（チップ選択）・重量/個数/コンテナ数（ステッパー）を持つフォームに実装する（Principle II: 片手操作・チップ/ステッパー中心）。保存成功時はフォームをリセットして連続入力しやすくする（US2 Acceptance Scenario 3）
-- [ ] T019 [US2] 保存失敗時に `supabase_error_mapper.dart` を使ったエラー表示を `harvest_screen.dart` に組み込む（FR-018）
+- [X] T015 [P] [US2] `test/size_grade_test.dart` に `SizeGrade` の日本語ラベル・DB値変換のユニットテストを作成する
+- [X] T016 [US2] `lib/features/harvest/data/harvest_repository.dart` に、収穫記録（`origin=own_farm`）と仕入れ記録（`origin=purchased`）それぞれを `lots` テーブルへINSERTするメソッドを実装する（FR-004, FR-005, FR-006）
+- [X] T017 [US2] `lib/features/harvest/application/harvest_providers.dart` にリポジトリProviderとフォーム送信状態（送信中/エラー）の`StateNotifier`または`AsyncNotifier`を実装する
+- [X] T018 [US2] `lib/features/harvest/presentation/harvest_screen.dart` を、「収穫」「仕入れ」を切り替えるセグメントと、圃場/品種/サイズ（チップ選択）・重量/個数/コンテナ数（ステッパー）を持つフォームに実装する（Principle II: 片手操作・チップ/ステッパー中心）。保存成功時はフォームをリセットして連続入力しやすくする（US2 Acceptance Scenario 3）
+- [X] T019 [US2] 保存失敗時に `supabase_error_mapper.dart` を使ったエラー表示を `harvest_screen.dart` に組み込む（FR-018）
 
 **Checkpoint**: US1・US2が組み合わさり、マスタ登録→収穫/仕入れ記録の一連の流れが動作する
 

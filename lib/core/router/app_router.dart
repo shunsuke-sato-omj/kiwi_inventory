@@ -2,12 +2,14 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../features/auth/application/auth_providers.dart';
+import '../../features/auth/data/auth_repository.dart';
 import '../../features/auth/presentation/login_screen.dart';
 import '../../features/dashboard/presentation/dashboard_screen.dart';
 import '../../features/harvest/presentation/harvest_screen.dart';
 import '../../features/inventory/presentation/inventory_screen.dart';
 import '../../features/master_data/presentation/master_data_screen.dart';
 import '../../features/shipping/presentation/shipping_screen.dart';
+import '../access/role_access.dart';
 import 'go_router_refresh_stream.dart';
 import 'home_shell.dart';
 
@@ -23,6 +25,15 @@ final Provider<GoRouter> appRouterProvider = Provider<GoRouter>((ref) {
 
       if (!loggedIn && !onLoginPage) return '/login';
       if (loggedIn && onLoginPage) return '/';
+
+      // FR-003: マスタ管理は管理者のみ。現場スタッフが直接URLでアクセスした
+      // 場合もホームへ戻す（ナビ項目の非表示はhome_shell.dart側で対応済み）。
+      if (loggedIn && state.matchedLocation == '/master-data') {
+        final UserRole? role = ref
+            .read(currentUserRoleProvider)
+            .valueOrNull;
+        if (role != null && !canManageMasterData(role)) return '/';
+      }
       return null;
     },
     routes: [

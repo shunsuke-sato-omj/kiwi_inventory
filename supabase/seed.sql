@@ -14,3 +14,8 @@ insert into public.storage_locations (name) values
   ('冷蔵庫A'),
   ('自宅保管')
 on conflict do nothing;
+
+insert into public.suppliers (name, location, contact, contract_started_at) values
+  ('鈴木農園', '福島県伊達市', 'suzuki-farm@example.com', '2024-04-01'),
+  ('佐藤果樹園', '福島県福島市', '090-1234-5678', '2025-03-15')
+on conflict do nothing;

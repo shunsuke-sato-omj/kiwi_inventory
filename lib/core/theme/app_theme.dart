@@ -79,6 +79,20 @@ class AppTheme {
 enum LotStatus { cold, ripening, ready, expired }
 
 extension LotStatusX on LotStatus {
+  static LotStatus fromDb(String value) => switch (value) {
+    'ripening' => LotStatus.ripening,
+    'ready' => LotStatus.ready,
+    'expired' => LotStatus.expired,
+    _ => LotStatus.cold,
+  };
+
+  String get dbValue => switch (this) {
+    LotStatus.cold => 'cold',
+    LotStatus.ripening => 'ripening',
+    LotStatus.ready => 'ready',
+    LotStatus.expired => 'expired',
+  };
+
   String get label => switch (this) {
     LotStatus.cold => '冷蔵保管',
     LotStatus.ripening => '追熟中',
