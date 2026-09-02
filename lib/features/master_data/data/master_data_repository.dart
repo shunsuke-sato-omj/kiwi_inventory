@@ -28,6 +28,22 @@ class MasterDataRepository {
     });
   }
 
+  Future<void> updateVariety({
+    required String id,
+    required String name,
+    int? standardRipeningDaysMin,
+    int? standardRipeningDaysMax,
+  }) async {
+    await _client
+        .from('varieties')
+        .update({
+          'name': name,
+          'standard_ripening_days_min': standardRipeningDaysMin,
+          'standard_ripening_days_max': standardRipeningDaysMax,
+        })
+        .eq('id', id);
+  }
+
   Future<List<FarmField>> fetchFields() async {
     final rows = await _client.from('fields').select().order('name');
     return rows.map(FarmField.fromRow).toList();
@@ -35,6 +51,17 @@ class MasterDataRepository {
 
   Future<void> createField({required String name, String? location}) async {
     await _client.from('fields').insert({'name': name, 'location': location});
+  }
+
+  Future<void> updateField({
+    required String id,
+    required String name,
+    String? location,
+  }) async {
+    await _client
+        .from('fields')
+        .update({'name': name, 'location': location})
+        .eq('id', id);
   }
 
   Future<List<Supplier>> fetchSuppliers() async {
@@ -58,6 +85,26 @@ class MasterDataRepository {
     });
   }
 
+  Future<void> updateSupplier({
+    required String id,
+    required String name,
+    String? location,
+    String? contact,
+    DateTime? contractStartedAt,
+  }) async {
+    await _client
+        .from('suppliers')
+        .update({
+          'name': name,
+          'location': location,
+          'contact': contact,
+          'contract_started_at': contractStartedAt == null
+              ? null
+              : _formatDate(contractStartedAt),
+        })
+        .eq('id', id);
+  }
+
   Future<List<StorageLocation>> fetchStorageLocations() async {
     final rows = await _client.from('storage_locations').select().order('name');
     return rows.map(StorageLocation.fromRow).toList();
@@ -65,6 +112,13 @@ class MasterDataRepository {
 
   Future<void> createStorageLocation({required String name}) async {
     await _client.from('storage_locations').insert({'name': name});
+  }
+
+  Future<void> updateStorageLocation({
+    required String id,
+    required String name,
+  }) async {
+    await _client.from('storage_locations').update({'name': name}).eq('id', id);
   }
 
   String _formatDate(DateTime date) =>

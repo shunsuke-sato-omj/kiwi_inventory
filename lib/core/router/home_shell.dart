@@ -80,6 +80,13 @@ class HomeShell extends ConsumerWidget {
           initialLocation: branchIndex == navigationShell.currentIndex,
         );
       },
+      actions: [
+        IconButton(
+          icon: const Icon(Icons.logout),
+          tooltip: 'ログアウト',
+          onPressed: () => ref.read(authRepositoryProvider).signOut(),
+        ),
+      ],
       body: navigationShell,
     );
   }
