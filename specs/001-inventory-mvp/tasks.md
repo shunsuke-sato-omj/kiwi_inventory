@@ -78,10 +78,10 @@ description: "Task list template for feature implementation"
 
 **Independent Test**: あるロットを「追熟中」→「追熟済み」に変更し反映されること、誤って別の状態に変えたあと任意の状態へ訂正できることを確認する。
 
-- [ ] T020 [US3] `lib/features/inventory/data/inventory_repository.dart` に、ロット一覧取得（ステータスでの絞り込み対応）・ステータス更新・`lot_status_history`取得のメソッドを実装する（FR-007, FR-008, FR-009, FR-010）
-- [ ] T021 [US3] `lib/features/inventory/application/inventory_providers.dart` に、選択中フィルタの`StateProvider<LotStatus?>`と、それに連動する一覧`FutureProvider`を実装する
-- [ ] T022 [US3] `lib/features/inventory/presentation/inventory_screen.dart` を、ステータス絞り込みチップ＋ロット一覧＋各ロットのステータス変更メニュー（現在の状態に関わらずどの状態にも変更可・FR-008）を持つ画面に実装する
-- [ ] T023 [US3] `inventory_screen.dart` の各ロット詳細に、`lot_status_history` を新しい順に表示する簡易な履歴表示（ボトムシート等）を追加する（FR-009: 遡って確認できる）
+- [X] T020 [US3] `lib/features/inventory/data/inventory_repository.dart` に、ロット一覧取得（ステータスでの絞り込み対応）・ステータス更新・`lot_status_history`取得のメソッドを実装する（FR-007, FR-008, FR-009, FR-010）
+- [X] T021 [US3] `lib/features/inventory/application/inventory_providers.dart` に、選択中フィルタの`StateProvider<LotStatus?>`と、それに連動する一覧`FutureProvider`を実装する
+- [X] T022 [US3] `lib/features/inventory/presentation/inventory_screen.dart` を、ステータス絞り込みチップ＋ロット一覧＋各ロットのステータス変更メニュー（現在の状態に関わらずどの状態にも変更可・FR-008）を持つ画面に実装する
+- [X] T023 [US3] `inventory_screen.dart` の各ロット詳細に、`lot_status_history` を新しい順に表示する簡易な履歴表示（ボトムシート等）を追加する（FR-009: 遡って確認できる）
 
 **Checkpoint**: US1〜US3で「記録→在庫確認→訂正」の中心フローが完結する
 
@@ -93,11 +93,11 @@ description: "Task list template for feature implementation"
 
 **Independent Test**: 在庫のあるロットを選び出荷記録を保存して在庫一覧の数量が減ること、残り在庫を超える数量を入力すると保存がブロックされることを確認する。
 
-- [ ] T024 [P] [US4] `test/shipment_validation_test.dart` に、出荷数量が残り在庫を超える／ちょうど／下回るケースの `validateShipmentQuantity` ユニットテストを作成する（FR-017）
-- [ ] T025 [US4] `lib/core/validation/shipment_validation.dart` に `String? validateShipmentQuantity({required num requested, required num remaining})` を実装する（超過時はエラーメッセージ、それ以外は`null`を返す純粋関数）
-- [ ] T026 [US4] `lib/features/shipping/data/shipping_repository.dart` に、対象ロットの残り在庫数量算出（ロット数量 − 既存出荷合計）と、出荷記録INSERT（保存前に`validateShipmentQuantity`を呼ぶ）を実装する
-- [ ] T027 [US4] `lib/features/shipping/application/shipping_providers.dart` にリポジトリProviderと残数取得の`FutureProvider.family<num, String /*lotId*/>`を実装する
-- [ ] T028 [US4] `lib/features/shipping/presentation/shipping_screen.dart` を、対象ロット選択・出荷先種別チップ（EC/卸売/体験プログラム）・数量ステッパー・配送方法（`channel=program`のときは非表示・FR-012）を持つフォームに実装し、バリデーションエラーをインライン表示する
+- [X] T024 [P] [US4] `test/shipment_validation_test.dart` に、出荷数量が残り在庫を超える／ちょうど／下回るケースの `validateShipmentQuantity` ユニットテストを作成する（FR-017）
+- [X] T025 [US4] `lib/core/validation/shipment_validation.dart` に `String? validateShipmentQuantity({required num requested, required num remaining})` を実装する（超過時はエラーメッセージ、それ以外は`null`を返す純粋関数）
+- [X] T026 [US4] `lib/features/shipping/data/shipping_repository.dart` に、対象ロットの残り在庫数量算出（ロット数量 − 既存出荷合計）と、出荷記録INSERT（保存前に`validateShipmentQuantity`を呼ぶ）を実装する
+- [X] T027 [US4] `lib/features/shipping/application/shipping_providers.dart` にリポジトリProviderと残数取得の`FutureProvider.family<num, String /*lotId*/>`を実装する
+- [X] T028 [US4] `lib/features/shipping/presentation/shipping_screen.dart` を、対象ロット選択・出荷先種別チップ（EC/卸売/体験プログラム）・数量ステッパー・配送方法（`channel=program`のときは非表示・FR-012）を持つフォームに実装し、バリデーションエラーをインライン表示する
 
 **Checkpoint**: US1〜US4で在庫の増減が一通り記録できる
 
