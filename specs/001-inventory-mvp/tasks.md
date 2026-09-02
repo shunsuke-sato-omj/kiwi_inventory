@@ -109,11 +109,11 @@ description: "Task list template for feature implementation"
 
 **Independent Test**: 追熟完了間近のロットや在庫の少ない品種がある状態でホーム画面を開き、それらが一覧表示されることを確認する。
 
-- [ ] T029 [P] [US5] `test/dashboard_metrics_test.dart` に、追熟完了が近いロットの判定・在庫僅少品種の判定のユニットテストを作成する
-- [ ] T030 [US5] `lib/core/logic/dashboard_metrics.dart` に `List<Lot> lotsNearingRipeness(...)`（品種の標準追熟日数と`ripening_started_at`から残日数を計算）と `List<Variety> lowStockVarieties(...)`（品種ごとの在庫合計としきい値を比較）を実装する。しきい値は暫定値をコード上の定数として定義し、コメントでReFruitsとの確認が必要な旨を明記する（Principle IV）
-- [ ] T031 [US5] `lib/features/dashboard/data/dashboard_repository.dart` に、全アクティブロットと品種一覧を取得するメソッドを実装する
-- [ ] T032 [US5] `lib/features/dashboard/application/dashboard_providers.dart` に、T030の関数を適用した`FutureProvider`（近い追熟ロット・低在庫品種）を実装する
-- [ ] T033 [US5] `lib/features/dashboard/presentation/dashboard_screen.dart` を、「追熟完了が近いロット」「在庫が少ない品種」の2セクションを表示する画面に実装する（FR-013, FR-014, SC-006）
+- [X] T029 [P] [US5] `test/dashboard_metrics_test.dart` に、追熟完了が近いロットの判定・在庫僅少品種の判定のユニットテストを作成する
+- [X] T030 [US5] `lib/core/logic/dashboard_metrics.dart` に `List<Lot> lotsNearingRipeness(...)`（品種の標準追熟日数と`ripening_started_at`から残日数を計算）と `List<Variety> lowStockVarieties(...)`（品種ごとの在庫合計としきい値を比較）を実装する。しきい値は暫定値をコード上の定数として定義し、コメントでReFruitsとの確認が必要な旨を明記する（Principle IV）
+- [X] T031 [US5] `lib/features/dashboard/data/dashboard_repository.dart` に、全アクティブロットと品種一覧を取得するメソッドを実装する
+- [X] T032 [US5] `lib/features/dashboard/application/dashboard_providers.dart` に、T030の関数を適用した`FutureProvider`（近い追熟ロット・低在庫品種）を実装する
+- [X] T033 [US5] `lib/features/dashboard/presentation/dashboard_screen.dart` を、「追熟完了が近いロット」「在庫が少ない品種」の2セクションを表示する画面に実装する（FR-013, FR-014, SC-006）
 
 **Checkpoint**: 全5ユーザーストーリーが完結し、spec.mdのAcceptance Scenariosをすべて満たす
 
@@ -121,11 +121,11 @@ description: "Task list template for feature implementation"
 
 ## Phase 8: Polish & Cross-Cutting Concerns
 
-- [ ] T034 [P] `flutter analyze` を実行し、警告0件を確認する（Principle V）
-- [ ] T035 [P] `dart format lib test` を実行し、フォーマット崩れがないことを確認する（Principle V）
-- [ ] T036 [P] `flutter test` を実行し、全ユニットテストが成功することを確認する
-- [ ] T037 [P] `README.md` の「フォルダ構成」節を、プレースホルダーではなくなった各featureの実装内容に合わせて更新する
-- [ ] T038 quickstart.md の検証シナリオ（US1〜US5）を実機/エミュレータで一通りなぞり、差異があればspec.md/tasks.mdにフィードバックする
+- [X] T034 [P] `flutter analyze` を実行し、警告0件を確認する（Principle V）
+- [X] T035 [P] `dart format lib test` を実行し、フォーマット崩れがないことを確認する（Principle V）
+- [X] T036 [P] `flutter test` を実行し、全ユニットテストが成功することを確認する
+- [X] T037 [P] `README.md` の「フォルダ構成」節を、プレースホルダーではなくなった各featureの実装内容に合わせて更新する
+- [X] T038 quickstart.md の検証シナリオ（US1〜US5）を実機/エミュレータで一通りなぞり、差異があればspec.md/tasks.mdにフィードバックする
 
 ---
 

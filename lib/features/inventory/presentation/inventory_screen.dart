@@ -27,17 +27,17 @@ class InventoryScreen extends ConsumerWidget {
               ChoiceChip(
                 label: const Text('すべて'),
                 selected: currentFilter == null,
-                onSelected: (_) => ref
-                    .read(inventoryStatusFilterProvider.notifier)
-                    .state = null,
+                onSelected: (_) =>
+                    ref.read(inventoryStatusFilterProvider.notifier).state =
+                        null,
               ),
               for (final status in LotStatus.values)
                 ChoiceChip(
                   label: Text(status.label),
                   selected: currentFilter == status,
-                  onSelected: (_) => ref
-                      .read(inventoryStatusFilterProvider.notifier)
-                      .state = status,
+                  onSelected: (_) =>
+                      ref.read(inventoryStatusFilterProvider.notifier).state =
+                          status,
                 ),
             ],
           ),
@@ -48,12 +48,10 @@ class InventoryScreen extends ConsumerWidget {
                 ? const Center(child: Text('該当する在庫ロットがありません'))
                 : ListView.builder(
                     itemCount: lots.length,
-                    itemBuilder: (context, index) =>
-                        _LotTile(lot: lots[index]),
+                    itemBuilder: (context, index) => _LotTile(lot: lots[index]),
                   ),
             loading: () => const Center(child: CircularProgressIndicator()),
-            error: (e, st) =>
-                Center(child: Text(mapSupabaseErrorToMessage(e))),
+            error: (e, st) => Center(child: Text(mapSupabaseErrorToMessage(e))),
           ),
         ),
       ],

@@ -20,10 +20,7 @@ void main() {
 
     test('0以下の数量はエラーになる', () {
       expect(validateShipmentQuantity(requested: 0, remaining: 10), isNotNull);
-      expect(
-        validateShipmentQuantity(requested: -1, remaining: 10),
-        isNotNull,
-      );
+      expect(validateShipmentQuantity(requested: -1, remaining: 10), isNotNull);
     });
   });
 }

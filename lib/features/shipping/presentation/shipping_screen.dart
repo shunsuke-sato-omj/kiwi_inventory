@@ -43,9 +43,8 @@ class _ShippingScreenState extends ConsumerState<ShippingScreen> {
 
     if (!mounted) return;
     if (ok) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('出荷を記録しました')));
+      ScaffoldMessenger.of(context)
+          .showSnackBar(const SnackBar(content: Text('出荷を記録しました')));
       ref.invalidate(shippableLotsProvider);
       setState(() {
         _selectedLot = null;
@@ -90,7 +89,9 @@ class _ShippingScreenState extends ConsumerState<ShippingScreen> {
                     children: [
                       for (final lot in lots)
                         ChoiceChip(
-                          label: Text('${lot.varietyName ?? lot.lotCode} (${lot.lotCode})'),
+                          label: Text(
+                            '${lot.varietyName ?? lot.lotCode} (${lot.lotCode})',
+                          ),
                           selected: _selectedLot?.id == lot.id,
                           onSelected: (selected) => setState(
                             () => _selectedLot = selected ? lot : null,
@@ -134,8 +135,7 @@ class _ShippingScreenState extends ConsumerState<ShippingScreen> {
                   ChoiceChip(
                     label: Text(method.label),
                     selected: _deliveryMethod == method,
-                    onSelected: (_) =>
-                        setState(() => _deliveryMethod = method),
+                    onSelected: (_) => setState(() => _deliveryMethod = method),
                   ),
               ],
             ),

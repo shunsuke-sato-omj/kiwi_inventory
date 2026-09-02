@@ -11,13 +11,14 @@ class InventoryRepository {
 
   /// [statusFilter] が null の場合はすべてのロットを返す（FR-010）。
   Future<List<Lot>> fetchLots({LotStatus? statusFilter}) async {
-    var query = _client
-        .from('lots')
-        .select('*, varieties(name)');
+    var query = _client.from('lots').select('*, varieties(name)');
     if (statusFilter != null) {
       query = query.eq('status', statusFilter.dbValue);
     }
-    final rows = await query.order('harvested_or_purchased_at', ascending: false);
+    final rows = await query.order(
+      'harvested_or_purchased_at',
+      ascending: false,
+    );
     return rows.map(Lot.fromRow).toList();
   }
 

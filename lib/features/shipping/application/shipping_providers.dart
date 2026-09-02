@@ -18,7 +18,8 @@ final FutureProvider<List<Lot>> shippableLotsProvider =
 
 /// 選択中ロットの残り在庫数量（FR-017のUI側事前表示に使う）。
 final remainingQuantityProvider = FutureProvider.family<num, String>(
-  (ref, lotId) => ref.watch(shippingRepositoryProvider).fetchRemainingQuantity(lotId),
+  (ref, lotId) =>
+      ref.watch(shippingRepositoryProvider).fetchRemainingQuantity(lotId),
 );
 
 /// 出荷フォームの送信状態。

@@ -76,9 +76,8 @@ class _MasterDataTabScaffold extends StatelessWidget {
 }
 
 void _showErrorSnackBar(BuildContext context, Object error) {
-  ScaffoldMessenger.of(context).showSnackBar(
-    SnackBar(content: Text(mapSupabaseErrorToMessage(error))),
-  );
+  ScaffoldMessenger.of(context)
+      .showSnackBar(SnackBar(content: Text(mapSupabaseErrorToMessage(error))));
 }
 
 class _VarietyTab extends ConsumerWidget {
@@ -165,12 +164,8 @@ class _VarietyTab extends ConsumerWidget {
                     .read(masterDataRepositoryProvider)
                     .createVariety(
                       name: name,
-                      standardRipeningDaysMin: int.tryParse(
-                        minController.text,
-                      ),
-                      standardRipeningDaysMax: int.tryParse(
-                        maxController.text,
-                      ),
+                      standardRipeningDaysMin: int.tryParse(minController.text),
+                      standardRipeningDaysMax: int.tryParse(maxController.text),
                     );
                 ref.invalidate(varietiesProvider);
                 if (dialogContext.mounted) Navigator.of(dialogContext).pop();
@@ -465,9 +460,8 @@ class _EmptyHint extends StatelessWidget {
   final String text;
 
   @override
-  Widget build(BuildContext context) => Center(
-    child: Text(text, style: Theme.of(context).textTheme.bodyMedium),
-  );
+  Widget build(BuildContext context) =>
+      Center(child: Text(text, style: Theme.of(context).textTheme.bodyMedium));
 }
 
 class _ErrorHint extends StatelessWidget {

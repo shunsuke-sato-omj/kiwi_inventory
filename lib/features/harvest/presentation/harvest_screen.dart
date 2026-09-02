@@ -93,9 +93,8 @@ class _HarvestScreenState extends ConsumerState<HarvestScreen> {
   }
 
   void _showSnackBar(String message) {
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(SnackBar(content: Text(message)));
+    ScaffoldMessenger.of(context)
+        .showSnackBar(SnackBar(content: Text(message)));
   }
 
   @override
@@ -177,8 +176,7 @@ class _HarvestScreenState extends ConsumerState<HarvestScreen> {
             nameOf: (s) => s.name,
             idOf: (s) => s.id,
             selectedId: _selectedStorageLocationId,
-            onSelected: (id) =>
-                setState(() => _selectedStorageLocationId = id),
+            onSelected: (id) => setState(() => _selectedStorageLocationId = id),
           ),
           const SizedBox(height: 16),
           _SectionLabel(_mode == _RecordMode.harvest ? '収穫日' : '仕入日'),
@@ -309,9 +307,7 @@ class _StepperField extends StatelessWidget {
         Expanded(child: Text(label)),
         IconButton(
           icon: const Icon(Icons.remove_circle_outline),
-          onPressed: value - step < min
-              ? null
-              : () => onChanged(value - step),
+          onPressed: value - step < min ? null : () => onChanged(value - step),
         ),
         SizedBox(
           width: 56,

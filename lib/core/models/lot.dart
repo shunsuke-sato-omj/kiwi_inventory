@@ -77,7 +77,8 @@ class Lot extends Equatable {
       row['harvested_or_purchased_at'] as String,
     ),
     varietyId: row['variety_id'] as String?,
-    varietyName: (row['varieties'] as Map<String, dynamic>?)?['name'] as String?,
+    varietyName:
+        (row['varieties'] as Map<String, dynamic>?)?['name'] as String?,
     fieldId: row['field_id'] as String?,
     supplierId: row['supplier_id'] as String?,
     weightKg: (row['weight_kg'] as num?)?.toDouble(),

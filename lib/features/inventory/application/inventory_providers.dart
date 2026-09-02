@@ -24,7 +24,8 @@ final FutureProvider<List<Lot>> filteredLotsProvider =
     });
 
 /// 指定ロットのステータス変更履歴（FR-009）。
-final lotStatusHistoryProvider = FutureProvider.family<
-  List<LotStatusHistoryEntry>,
-  String
->((ref, lotId) => ref.watch(inventoryRepositoryProvider).fetchStatusHistory(lotId));
+final lotStatusHistoryProvider =
+    FutureProvider.family<List<LotStatusHistoryEntry>, String>(
+      (ref, lotId) =>
+          ref.watch(inventoryRepositoryProvider).fetchStatusHistory(lotId),
+    );

@@ -59,9 +59,7 @@ class MasterDataRepository {
   }
 
   Future<List<StorageLocation>> fetchStorageLocations() async {
-    final rows = await _client.from('storage_locations').select().order(
-      'name',
-    );
+    final rows = await _client.from('storage_locations').select().order('name');
     return rows.map(StorageLocation.fromRow).toList();
   }
 

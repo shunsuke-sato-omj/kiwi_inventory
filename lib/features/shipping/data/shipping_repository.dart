@@ -29,7 +29,9 @@ class ShippingRepository {
         .eq('id', lotId)
         .single();
     final num total =
-        (lotRow['weight_kg'] as num?) ?? (lotRow['quantity_count'] as num?) ?? 0;
+        (lotRow['weight_kg'] as num?) ??
+        (lotRow['quantity_count'] as num?) ??
+        0;
 
     final shipmentRows = await _client
         .from('shipments')
