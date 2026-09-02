@@ -13,7 +13,7 @@
 
 ## Requirement Completeness
 
-- [ ] No [NEEDS CLARIFICATION] markers remain
+- [x] No [NEEDS CLARIFICATION] markers remain
 - [x] Requirements are testable and unambiguous
 - [x] Success criteria are measurable
 - [x] Success criteria are technology-agnostic (no implementation details)
@@ -31,5 +31,5 @@
 
 ## Notes
 
-- 残る [NEEDS CLARIFICATION] は2件（Edge Casesの現場でのオフライン対応／FR-016のサイズ・等級規格）。いずれも要件定義書13章「要確認事項一覧」に含まれる既知の未確定事項であり、新規の疑問ではない。
-- `/speckit-clarify` で選択肢を提示して解消するか、次回のエンドユーザーへの追加ヒアリングで確認したうえで、本ファイルを更新してから `/speckit-plan` に進むことを推奨する。
+- 2026-09-02の `/speckit-clarify` セッションで、残っていた2件の [NEEDS CLARIFICATION]（現場でのオフライン対応／FR-016のサイズ・等級規格）に加え、出荷数量の在庫超過チェックと仕入先マスタの項目粒度についても暫定方針を確定し、spec.md に反映済み（FR-016〜FR-018、Key Entities、Assumptions）。
+- いずれも要件定義書13章「要確認事項一覧」に基づく暫定方針であり、社内基準・エンドユーザーとの正式合意が取れ次第、見直しが必要になる可能性がある。
