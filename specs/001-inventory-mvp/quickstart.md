@@ -18,10 +18,11 @@ flutter pub get
 #    - supabase/migrations/0002_supplier_contract_date.sql（本feature追加分）
 #    - supabase/seed.sql（開発用サンプルデータ、任意）
 
-# 3. 起動
-flutter run -d chrome \
-  --dart-define=SUPABASE_URL=<Project URL> \
-  --dart-define=SUPABASE_ANON_KEY=<anon public key>
+# 3. 接続情報を config/local.json に設定（初回のみ、詳細はREADME.md参照）
+cp config/local.json.example config/local.json
+
+# 4. 起動
+flutter run -d web-server --web-port=8080 --dart-define-from-file=config/local.json
 ```
 
 ## 検証シナリオ

@@ -49,3 +49,7 @@ app.*.map.json
 
 # Coding agent local settings (may contain credentials/tokens)
 .claude/settings.local.json
+
+# Local Supabase connection info for --dart-define-from-file (see config/local.json.example)
+/config/local.json
+/config/*.local.json

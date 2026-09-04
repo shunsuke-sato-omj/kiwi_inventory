@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
+import '../../../core/data/supabase_error_mapper.dart';
 import '../../../core/theme/app_theme.dart';
 import '../application/auth_providers.dart';
 
@@ -46,11 +48,32 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
           );
     } catch (e) {
       setState(() {
-        _errorMessage = 'ログインできませんでした。メールアドレスとパスワードをご確認ください。';
+        // AuthExceptionのmessageには「メール未確認」「認証情報が誤り」等、
+        // 原因の異なる具体的な内容が入っているため、汎用文言で握りつぶさず
+        // そのまま見せる（現場・管理者からの問い合わせ対応をしやすくするため）。
+        _errorMessage = e is AuthException
+            ? _describeAuthError(e)
+            : mapSupabaseErrorToMessage(e);
       });
     } finally {
       if (mounted) setState(() => _isSubmitting = false);
     }
+  }
+
+  /// Supabase Authからのエラーを、原因が分かるように日本語化する。
+  /// 未知のケースはmessageをそのまま出す（原因不明のまま握りつぶさない）。
+  String _describeAuthError(AuthException e) {
+    final message = e.message.toLowerCase();
+    if (message.contains('invalid login credentials')) {
+      return 'メールアドレスまたはパスワードが正しくありません。';
+    }
+    if (message.contains('email not confirmed')) {
+      return 'メールアドレスの確認が完了していません。管理者にご確認ください。';
+    }
+    if (message.contains('rate limit')) {
+      return '試行回数が多すぎます。しばらく時間をおいて再度お試しください。';
+    }
+    return 'ログインできませんでした（${e.message}）。解決しない場合は管理者にご連絡ください。';
   }
 
   @override

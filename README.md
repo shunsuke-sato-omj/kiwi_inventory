@@ -33,7 +33,24 @@
 flutter pub get
 ```
 
-### 4. アプリの起動（ローカル確認）
+### 4. 接続情報の設定（初回のみ）
+
+毎回 `--dart-define` を並べなくて済むように、接続情報を1つのファイルにまとめておきます（このファイルはGitには含まれません）。
+
+```bash
+cp config/local.json.example config/local.json
+# config/local.json を開き、Project URL / anon public key を書き込む
+```
+
+### 5. アプリの起動（ローカル確認）
+
+```bash
+flutter run -d web-server --web-port=8080 --dart-define-from-file=config/local.json
+```
+
+起動後、ブラウザで `http://localhost:8080` を開いてください。（Chromeが使える環境では `-d chrome` でも可）
+
+値を毎回指定したい場合は、従来どおり個別に渡すこともできます:
 
 ```bash
 flutter run -d chrome \
@@ -41,19 +58,15 @@ flutter run -d chrome \
   --dart-define=SUPABASE_ANON_KEY=<anon public key>
 ```
 
-WSL環境など `-d chrome` が使えない場合は、`flutter run -d web-server --web-port=8080 --dart-define=...` で起動し、`http://localhost:8080` をブラウザで開いてください。
-
-### 5. Web向けビルド
+### 6. Web向けビルド
 
 ```bash
-flutter build web \
-  --dart-define=SUPABASE_URL=<Project URL> \
-  --dart-define=SUPABASE_ANON_KEY=<anon public key>
+flutter build web --dart-define-from-file=config/local.json
 ```
 
 `build/web` 配下に静的ファイルが出力されます。任意のホスティング（Netlify, Vercel, Firebase Hosting等）にデプロイできます。
 
-### 6. 品質チェック
+### 7. 品質チェック
 
 ```bash
 flutter analyze

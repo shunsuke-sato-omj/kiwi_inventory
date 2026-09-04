@@ -1,13 +1,17 @@
 /// アプリの環境設定値。
 ///
-/// 値は `--dart-define` 経由で注入します（.env ファイルはWebビルドに含めない方針）。
-/// 例:
+/// 値は `--dart-define`（コンパイル時定数）経由で注入します
+/// （.env ファイルを実行時に読み込む方式はWebビルドに含めない方針）。
+/// 個別に指定する場合:
 ///   flutter run -d chrome \
 ///     --dart-define=SUPABASE_URL=https://xxxx.supabase.co \
 ///     --dart-define=SUPABASE_ANON_KEY=xxxxxxxx
 ///
-/// ローカル開発を楽にしたい場合は、`tool/run_dev.sh` のようなスクリプトを
-/// 各自のローカル環境で用意し、そこに値を書いてください（Gitには含めない）。
+/// ローカル開発では `config/local.json.example` を `config/local.json`
+/// にコピーして値を書き込み、`--dart-define-from-file=config/local.json`
+/// で一括指定できます（`config/local.json` はGitに含めません）。
+/// どちらの方法でも、渡された値はコンパイル時定数として同じように
+/// `String.fromEnvironment` に渡されるため、このクラスの実装は変わりません。
 class Env {
   const Env._();
 
