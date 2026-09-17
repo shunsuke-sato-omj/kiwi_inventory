@@ -1,0 +1,4 @@
+# golden_toolkit が付与する `golden` タグを認識させるための設定。
+# （constitution Principle II: widgetテスト = goldenテスト）
+tags:
+  golden:
