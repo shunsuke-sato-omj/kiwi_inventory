@@ -12,9 +12,12 @@ final Provider<ShippingRepository> shippingRepositoryProvider =
 
 /// 出荷先選択用のロット一覧。
 final FutureProvider<List<Lot>> shippableLotsProvider =
-    FutureProvider<List<Lot>>(
-      (ref) => ref.watch(shippingRepositoryProvider).fetchShippableLots(),
-    );
+    FutureProvider<List<Lot>>((ref) {
+      // ログイン状態が変わるたびに再取得する（別ユーザーへの切り替え時に
+      // 前のユーザーが見ていたデータが残らないようにするため）。
+      ref.watch(authStateChangesProvider);
+      return ref.watch(shippingRepositoryProvider).fetchShippableLots();
+    });
 
 /// 選択中ロットの残り在庫数量（FR-017のUI側事前表示に使う）。
 final remainingQuantityProvider = FutureProvider.family<num, String>(

@@ -12,6 +12,10 @@ class GoRouterRefreshStream extends ChangeNotifier {
 
   late final StreamSubscription<dynamic> _subscription;
 
+  /// Stream以外の要因（非同期に取得する役割情報の解決など）でも
+  /// redirectを再評価させたいときに呼ぶ。
+  void ping() => notifyListeners();
+
   @override
   void dispose() {
     _subscription.cancel();

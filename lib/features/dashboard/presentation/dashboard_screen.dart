@@ -18,10 +18,11 @@ class DashboardScreen extends ConsumerWidget {
     final lowStockAsync = ref.watch(lowStockVarietiesProvider);
 
     return RefreshIndicator(
-      onRefresh: () async {
-        ref.invalidate(activeLotsProvider);
-        ref.invalidate(dashboardVarietiesProvider);
-      },
+      onRefresh: () => Future.wait([
+        ref.refresh(activeLotsProvider.future),
+        ref.refresh(dashboardVarietiesProvider.future),
+        ref.refresh(shippedTotalsProvider.future),
+      ]),
       child: ListView(
         padding: const EdgeInsets.all(16),
         children: [

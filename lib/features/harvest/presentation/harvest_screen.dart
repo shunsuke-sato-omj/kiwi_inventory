@@ -62,6 +62,10 @@ class _HarvestScreenState extends ConsumerState<HarvestScreen> {
       _quantityMode == _QuantityMode.count ? _quantityCount : null;
 
   Future<void> _submit() async {
+    // ボタンの無効化はビルド後にしか反映されないため、連打で二重送信に
+    // ならないよう、送信中はここで確実に弾く。
+    if (ref.read(harvestFormControllerProvider).isLoading) return;
+
     final controller = ref.read(harvestFormControllerProvider.notifier);
     final bool ok;
     if (_mode == _RecordMode.harvest) {

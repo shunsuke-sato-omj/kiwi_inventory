@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../features/auth/application/auth_providers.dart';
 import '../../features/auth/data/auth_repository.dart';
 import '../access/role_access.dart';
+import '../data/supabase_error_mapper.dart';
 import '../widgets/responsive_scaffold.dart';
 
 /// ダッシュボード／収穫／在庫／出荷／マスタ管理を束ねる共通シェル。
@@ -84,10 +85,25 @@ class HomeShell extends ConsumerWidget {
         IconButton(
           icon: const Icon(Icons.logout),
           tooltip: 'ログアウト',
-          onPressed: () => ref.read(authRepositoryProvider).signOut(),
+          onPressed: () => _signOut(context, ref),
         ),
       ],
       body: navigationShell,
     );
+  }
+
+  /// サインアウトに失敗した場合（通信断など）も気付けるよう、結果を待って
+  /// エラーを表示する（それまでは投げっぱなしで、失敗してもセッションが
+  /// 生きたままなのにユーザーはログアウトしたと思い込んでしまっていた）。
+  Future<void> _signOut(BuildContext context, WidgetRef ref) async {
+    try {
+      await ref.read(authRepositoryProvider).signOut();
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(mapSupabaseErrorToMessage(e))));
+      }
+    }
   }
 }

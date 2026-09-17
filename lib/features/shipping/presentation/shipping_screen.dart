@@ -24,7 +24,24 @@ class _ShippingScreenState extends ConsumerState<ShippingScreen> {
   double _quantityKg = 1;
   String? _inlineError;
 
+  /// 選択中ロットが個数のみで記録されている（重量記録が無い）場合は
+  /// kgではなく個数として数量を扱う（重量と個数は単位が異なるため、
+  /// 個数のロットをkg扱いすると誤った数量を出荷記録してしまう）。
+  bool get _isCountBased =>
+      _selectedLot != null &&
+      _selectedLot!.weightKg == null &&
+      _selectedLot!.quantityCount != null;
+
+  String get _quantityUnitLabel => _isCountBased ? '個' : 'kg';
+
+  /// 個数は1個単位、重量は0.5kg単位で増減する。
+  double get _quantityStep => _isCountBased ? 1 : 0.5;
+
   Future<void> _submit() async {
+    // ボタンの無効化はビルド後にしか反映されないため、連打で二重送信に
+    // ならないよう、送信中はここで確実に弾く。
+    if (ref.read(shipmentFormControllerProvider).isLoading) return;
+
     setState(() => _inlineError = null);
     final lot = _selectedLot;
     if (lot == null) {
@@ -96,9 +113,12 @@ class _ShippingScreenState extends ConsumerState<ShippingScreen> {
                             '${lot.varietyName ?? lot.lotCode} (${lot.lotCode})',
                           ),
                           selected: _selectedLot?.id == lot.id,
-                          onSelected: (selected) => setState(
-                            () => _selectedLot = selected ? lot : null,
-                          ),
+                          onSelected: (selected) => setState(() {
+                            _selectedLot = selected ? lot : null;
+                            // 単位（kg/個）がロットごとに変わりうるため、
+                            // 別のロットを選び直したら数量を既定値に戻す。
+                            _quantityKg = 1;
+                          }),
                         ),
                     ],
                   ),
@@ -108,7 +128,11 @@ class _ShippingScreenState extends ConsumerState<ShippingScreen> {
           if (remainingAsync != null) ...[
             const SizedBox(height: 8),
             remainingAsync.when(
-              data: (remaining) => Text('残り在庫: $remaining kg'),
+              data: (remaining) => Text(
+                '残り在庫: '
+                '${_isCountBased ? remaining.round() : remaining}'
+                '$_quantityUnitLabel',
+              ),
               loading: () => const Text('残り在庫を確認中...'),
               error: (e, st) => Text(mapSupabaseErrorToMessage(e)),
             ),
@@ -164,27 +188,29 @@ class _ShippingScreenState extends ConsumerState<ShippingScreen> {
             children: [
               Expanded(
                 child: Text(
-                  '出荷数量 (kg)',
+                  '出荷数量 ($_quantityUnitLabel)',
                   style: Theme.of(context).textTheme.labelLarge,
                 ),
               ),
               IconButton(
                 icon: const Icon(Icons.remove_circle_outline),
-                onPressed: _quantityKg - 0.5 <= 0
+                onPressed: _quantityKg - _quantityStep <= 0
                     ? null
-                    : () => setState(() => _quantityKg -= 0.5),
+                    : () => setState(() => _quantityKg -= _quantityStep),
               ),
               SizedBox(
                 width: 56,
                 child: Text(
-                  _quantityKg.toStringAsFixed(1),
+                  _isCountBased
+                      ? _quantityKg.round().toString()
+                      : _quantityKg.toStringAsFixed(1),
                   textAlign: TextAlign.center,
                   style: Theme.of(context).textTheme.titleMedium,
                 ),
               ),
               IconButton(
                 icon: const Icon(Icons.add_circle_outline),
-                onPressed: () => setState(() => _quantityKg += 0.5),
+                onPressed: () => setState(() => _quantityKg += _quantityStep),
               ),
             ],
           ),

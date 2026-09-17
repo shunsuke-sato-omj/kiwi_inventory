@@ -11,24 +11,30 @@ final Provider<MasterDataRepository> masterDataRepositoryProvider =
 
 /// 品種一覧。収穫記録画面（harvest）のドロップダウン/チップ選択でも再利用する。
 final FutureProvider<List<Variety>> varietiesProvider =
-    FutureProvider<List<Variety>>(
-      (ref) => ref.watch(masterDataRepositoryProvider).fetchVarieties(),
-    );
+    FutureProvider<List<Variety>>((ref) {
+      // ログイン状態が変わるたびに再取得する（別ユーザーへの切り替え時に
+      // 前のユーザーが見ていたデータが残らないようにするため）。
+      ref.watch(authStateChangesProvider);
+      return ref.watch(masterDataRepositoryProvider).fetchVarieties();
+    });
 
 /// 圃場一覧。
 final FutureProvider<List<FarmField>> fieldsProvider =
-    FutureProvider<List<FarmField>>(
-      (ref) => ref.watch(masterDataRepositoryProvider).fetchFields(),
-    );
+    FutureProvider<List<FarmField>>((ref) {
+      ref.watch(authStateChangesProvider);
+      return ref.watch(masterDataRepositoryProvider).fetchFields();
+    });
 
 /// 仕入先一覧。
 final FutureProvider<List<Supplier>> suppliersProvider =
-    FutureProvider<List<Supplier>>(
-      (ref) => ref.watch(masterDataRepositoryProvider).fetchSuppliers(),
-    );
+    FutureProvider<List<Supplier>>((ref) {
+      ref.watch(authStateChangesProvider);
+      return ref.watch(masterDataRepositoryProvider).fetchSuppliers();
+    });
 
 /// 保管場所一覧。
 final FutureProvider<List<StorageLocation>> storageLocationsProvider =
-    FutureProvider<List<StorageLocation>>(
-      (ref) => ref.watch(masterDataRepositoryProvider).fetchStorageLocations(),
-    );
+    FutureProvider<List<StorageLocation>>((ref) {
+      ref.watch(authStateChangesProvider);
+      return ref.watch(masterDataRepositoryProvider).fetchStorageLocations();
+    });

@@ -138,6 +138,7 @@ class _MasterDataFormDialog extends StatefulWidget {
 class _MasterDataFormDialogState extends State<_MasterDataFormDialog> {
   final _controllers = <String, TextEditingController>{};
   final _dateValues = <String, DateTime?>{};
+  String? _errorText;
 
   @override
   void initState() {
@@ -169,11 +170,20 @@ class _MasterDataFormDialogState extends State<_MasterDataFormDialog> {
         continue;
       }
       final text = _controllers[field.key]!.text.trim();
-      if (field.required && text.isEmpty) return; // 必須未入力は保存しない
-      values[field.key] = switch (field.type) {
-        _FieldType.int => text.isEmpty ? null : int.tryParse(text),
-        _ => text.isEmpty ? null : text,
-      };
+      if (field.required && text.isEmpty) {
+        setState(() => _errorText = '${field.label}を入力してください');
+        return;
+      }
+      if (field.type == _FieldType.int && text.isNotEmpty) {
+        final parsed = int.tryParse(text);
+        if (parsed == null) {
+          setState(() => _errorText = '${field.label}には数値を入力してください');
+          return;
+        }
+        values[field.key] = parsed;
+        continue;
+      }
+      values[field.key] = text.isEmpty ? null : text;
     }
     Navigator.of(context).pop(values);
   }
@@ -186,6 +196,14 @@ class _MasterDataFormDialogState extends State<_MasterDataFormDialog> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
+            if (_errorText != null)
+              Padding(
+                padding: const EdgeInsets.only(bottom: 8),
+                child: Text(
+                  _errorText!,
+                  style: const TextStyle(color: Colors.red),
+                ),
+              ),
             for (final field in widget.fields)
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: 4),

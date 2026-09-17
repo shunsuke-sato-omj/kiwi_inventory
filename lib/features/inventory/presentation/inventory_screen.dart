@@ -113,10 +113,11 @@ class _LotTile extends ConsumerWidget {
         },
         itemBuilder: (context) => [
           for (final status in LotStatus.values)
-            PopupMenuItem(
-              value: _LotMenuAction.changeStatus(status),
-              child: Text('→ ${status.label}'),
-            ),
+            if (status != lot.status)
+              PopupMenuItem(
+                value: _LotMenuAction.changeStatus(status),
+                child: Text('→ ${status.label}'),
+              ),
           const PopupMenuDivider(),
           const PopupMenuItem(
             value: _LotMenuAction.viewHistory(),

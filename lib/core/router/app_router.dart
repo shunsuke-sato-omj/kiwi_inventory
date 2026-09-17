@@ -15,10 +15,17 @@ import 'home_shell.dart';
 
 final Provider<GoRouter> appRouterProvider = Provider<GoRouter>((ref) {
   final authRepository = ref.watch(authRepositoryProvider);
+  final refreshStream = GoRouterRefreshStream(authRepository.authStateChanges);
+
+  // currentUserRoleProviderは非同期に解決するため、authStateChangesが
+  // 発火した時点ではまだ結果が出ていないことがある（fail-closedでいったん
+  // ホームへ戻される）。役割の取得が完了した時点でもredirectを再評価させ、
+  // 本来アクセスできるはずの管理者がホームに留まり続けないようにする。
+  ref.listen(currentUserRoleProvider, (previous, next) => refreshStream.ping());
 
   return GoRouter(
     initialLocation: '/',
-    refreshListenable: GoRouterRefreshStream(authRepository.authStateChanges),
+    refreshListenable: refreshStream,
     redirect: (context, state) {
       final bool loggedIn = authRepository.currentUser != null;
       final bool onLoginPage = state.matchedLocation == '/login';

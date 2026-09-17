@@ -47,6 +47,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
             password: _passwordController.text,
           );
     } catch (e) {
+      if (!mounted) return;
       setState(() {
         // AuthExceptionのmessageには「メール未確認」「認証情報が誤り」等、
         // 原因の異なる具体的な内容が入っているため、汎用文言で握りつぶさず

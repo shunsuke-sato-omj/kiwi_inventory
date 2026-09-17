@@ -108,5 +108,28 @@ void main() {
       final result = lowStockVarieties(lots, [variety], threshold: 10);
       expect(result, contains(variety));
     });
+
+    test('出荷済み数量を差し引いた残り在庫で判定する', () {
+      // 記録重量は20kgだが15kg出荷済み → 残り5kgなのでしきい値(10kg)未満。
+      final lots = [_lot(id: '1', varietyId: 'v1', weightKg: 20)];
+      final result = lowStockVarieties(
+        lots,
+        [variety],
+        threshold: 10,
+        shippedTotalsKg: {'1': 15},
+      );
+      expect(result, contains(variety));
+    });
+
+    test('出荷済み数量を差し引いてもしきい値以上残っていれば含まない', () {
+      final lots = [_lot(id: '1', varietyId: 'v1', weightKg: 20)];
+      final result = lowStockVarieties(
+        lots,
+        [variety],
+        threshold: 10,
+        shippedTotalsKg: {'1': 5},
+      );
+      expect(result, isEmpty);
+    });
   });
 }

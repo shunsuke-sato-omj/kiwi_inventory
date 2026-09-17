@@ -41,8 +41,13 @@ List<Lot> lotsNearingRipeness(
   }).toList();
 }
 
-/// 品種ごとの重量（kg）合計（期限切れロットは除く）が [threshold] を
+/// 品種ごとの残り重量（kg）合計（期限切れロットは除く）が [threshold] を
 /// 下回る品種を返す（FR-014）。
+///
+/// 「残り重量」は、ロットの記録重量から既存の出荷済み数量
+/// （[shippedTotalsKg]、ロットIDごとの出荷済み合計kg）を差し引いたもの。
+/// 出荷分を差し引かずロットの記録重量をそのまま合計すると、出荷済みで
+/// 実際にはほぼ在庫が無い品種が「在庫が少ない品種」に出てこなくなってしまう。
 ///
 /// 重要な既知の制限: `threshold` はkg単位のしきい値だが、ロットは重量(kg)と
 /// 個数のどちらか一方で記録される（FR-016）。個数のみで記録されたロットは
@@ -55,13 +60,17 @@ List<Variety> lowStockVarieties(
   List<Lot> lots,
   List<Variety> varieties, {
   num threshold = kLowStockThresholdKg,
+  Map<String, num> shippedTotalsKg = const {},
 }) {
   final totals = <String, num>{};
   for (final lot in lots) {
     final varietyId = lot.varietyId;
     if (varietyId == null || lot.status == LotStatus.expired) continue;
     if (lot.weightKg == null) continue; // 個数のみのロットはkg基準の対象外
-    totals[varietyId] = (totals[varietyId] ?? 0) + lot.weightKg!;
+    final num shipped = shippedTotalsKg[lot.id] ?? 0;
+    final num remaining = lot.weightKg! - shipped;
+    totals[varietyId] =
+        (totals[varietyId] ?? 0) + (remaining < 0 ? 0 : remaining);
   }
   return varieties.where((v) => (totals[v.id] ?? 0) < threshold).toList();
 }

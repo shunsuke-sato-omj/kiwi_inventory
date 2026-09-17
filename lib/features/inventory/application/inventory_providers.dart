@@ -17,6 +17,9 @@ final StateProvider<LotStatus?> inventoryStatusFilterProvider =
 /// 絞り込み条件に連動する在庫ロット一覧。
 final FutureProvider<List<Lot>> filteredLotsProvider =
     FutureProvider<List<Lot>>((ref) {
+      // ログイン状態が変わるたびに再取得する（別ユーザーへの切り替え時に
+      // 前のユーザーが見ていたデータが残らないようにするため）。
+      ref.watch(authStateChangesProvider);
       final filter = ref.watch(inventoryStatusFilterProvider);
       return ref
           .watch(inventoryRepositoryProvider)

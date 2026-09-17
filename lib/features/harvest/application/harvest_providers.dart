@@ -2,7 +2,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/models/lot.dart';
 import '../../auth/application/auth_providers.dart';
-import '../../master_data/application/master_data_providers.dart';
 import '../data/harvest_repository.dart';
 
 final Provider<HarvestRepository> harvestRepositoryProvider =
@@ -79,9 +78,3 @@ harvestFormControllerProvider =
     StateNotifierProvider<HarvestFormController, AsyncValue<void>>(
       (ref) => HarvestFormController(ref),
     );
-
-/// 品種・圃場・保管場所の選択肢はマスタ管理と同じ一覧を再利用する（T014）。
-final varietyOptionsProvider = varietiesProvider;
-final fieldOptionsProvider = fieldsProvider;
-final supplierOptionsProvider = suppliersProvider;
-final storageLocationOptionsProvider = storageLocationsProvider;
